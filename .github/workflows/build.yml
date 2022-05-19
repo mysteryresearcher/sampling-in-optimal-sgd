@@ -1,0 +1,24 @@
+name: Build & Publish
+on:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  python_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release memory
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - uses: eWaterCycle/setup-singularity@v7
+        with:
+          singularity-version: 3.8.3
+      - name: Pull container
+        run: singularity pull library://k3nfalt/default/python_ml:sha256.efcd1fc038228cb7eb0f6f1942dfbaa439cd95d6463015b83ceb2dbaad9e1e98
+      - name: Run tests
+        run: PYTHONPATH=./code singularity exec python_ml_sha256.efcd1fc038228cb7eb0f6f1942dfbaa439cd95d6463015b83ceb2dbaad9e1e98.sif python3 -m pytest ./code/distributed_optimization_library/test/*
